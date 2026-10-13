@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use IMPRINT, please cite the accompanying paper."
+title: "IMPRINT: Policy-Agnostic Memory for Vision-Language-Action Policies"
+type: software
+authors:
+  - family-names: Wu
+    given-names: Yilin
+repository-code: "https://github.com/amazon-far/imprint"
+date-released: 2026-10-03
+license: Apache-2.0

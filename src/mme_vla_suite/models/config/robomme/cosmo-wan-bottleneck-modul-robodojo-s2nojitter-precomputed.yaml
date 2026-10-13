@@ -1,0 +1,75 @@
+# RoboDojo Stage-1 bottleneck-pretrain config. SEPARATE from the robocasa
+# cosmo-wan-bottleneck-modul.yaml (which stays 12-dim action / 16-dim proprio / 192 align-patches / 16-dim state).
+# RoboDojo differences (match the RoboDojo store):
+#   - action_in_dim 14, proprio_in_dim 14, state.input_dim 14  (bimanual joint; robocasa was 12/16/16)
+#   - decoder action_dim 14, proprio_dim 14
+#   - align_num_patches 12 (the store's align_prefix is 3 views * 2x2 pooled
+#     pi0.5 image-prefix tokens, language-conditioned through the prompt)
+#   - latent_source online + frame_jitter (no offline latents_v* built for RoboDojo)
+budget: 256
+num_views: 3
+streaming_obs_horizon: 16
+integration_type: modulation
+memory_token_dim: 1024
+representation_type: cosmo_bottleneck
+memory_feature:
+  img:
+    net: identity
+    input_dim: 2048
+  pos:
+    input_dim: 768
+    hidden_dim: 768
+  state:
+    input_dim: 14          # RoboDojo bimanual joint (robocasa: 16)
+    hidden_dim: 512
+cosmo_bottleneck_memory:
+  latent_source: offline   # 8 precomputed jitter variants (latents_v0..7) built -> fast + multi-GPU
+  # Stage-2 frozen-only acceleration: load frozen Stage-1 bottleneck tokens from this cache
+  # instead of re-reading latents/recent/action/proprio and rerunning mem_encoder in train.
+  precompute_memory_dir: artifacts/memory_tokens/robodojo
+  n_variants: 8
+  num_query_samples: 16
+  variant: Wan2.2-TI2V-5B
+  temporal_factor: 4
+  downsample: 2
+  num_latents: 256
+  num_cross_blocks: 2
+  num_heads: 8
+  cosmos_latent_dim: 48
+  siglip_dim: 2048
+  # Spatial pooling of the stored Wan latents (applied at load in _gather_offline).
+  # RoboDojo Wan input is 192x256 -> a NON-SQUARE 12x16 grid = 192 tok/view, 3 views = 576/chunk.
+  # Grid-agnostic (pool_h, pool_w) block-mean: 12/2 x 16/2 -> 2x2 = 4 tok/view = 12 tok/chunk.
+  # Cuts KV ~48x vs unpooled; full episode + eval horizon fit LATENT_CAP=2560 (no clipping).
+  pool_h: 2
+  pool_w: 2
+  latent_cap: 2560   # pooled full episode ~2052 tok -> 2560 fits w/ headroom, no clipping
+  wan_h: 192
+  wan_w: 256
+  proprio_in_dim: 14       # RoboDojo (robocasa: 16)
+  proprio_encoding: raw
+  action_in_dim: 14        # RoboDojo (robocasa: 12)
+  action_encoding: raw
+  lang_emb_dim: 2048
+  action_tokenizer_hidden: 512
+  proprio_tokenizer_hidden: 512
+cosmo_decoder:
+  num_heads: 8
+  num_blocks: 2
+  align_dim: 2048
+  align_num_patches: 12    # store align_prefix is 3 views * 2x2 language-conditioned image tokens
+  ffn_inner: 8192
+  action_dim: 14           # RoboDojo (robocasa: 12)
+  proprio_dim: 14          # RoboDojo (robocasa: 16)
+  max_query_steps: 2048
+frame_jitter:
+  enabled: false
+  start_jitter: 3
+  stride_choices: [1, 2, 3]
+  interval_jitter: 1
+  canonical_downsample: 2
+stream_aug:
+  enabled: false
+  gauss_sigma: 0.05
+  stream_drop_p: 0.1
+  feat_drop_p: 0.0

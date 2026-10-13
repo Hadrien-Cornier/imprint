@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+CONFIG_FILE="${1:-}"
+[[ -f "$CONFIG_FILE" ]] || {
+  echo "usage: $0 configs/paper/rmbench/molmoact2/experiment.env" >&2
+  exit 2
+}
+# shellcheck disable=SC1090
+source "$CONFIG_FILE"
+
+: "${MOLMOACT2_STAGE1_CHECKPOINT:?set MOLMOACT2_STAGE1_CHECKPOINT}"
+: "${MOLMOACT2_STAGE2_ROOT:?set MOLMOACT2_STAGE2_ROOT}"
+: "${MOLMOACT2_STAGE1_FEATURE_ROOT:?set MOLMOACT2_STAGE1_FEATURE_ROOT}"
+: "${MOLMOACT2_SAVE_FOLDER:?set MOLMOACT2_SAVE_FOLDER}"
+
+export RUN_VARIANT="${MOLMOACT2_RUN_VARIANT:-native}"
+export PYTHON_BIN="${MOLMOACT2_PYTHON:-python}"
+export BASE_MODEL="${MOLMOACT2_BASE_MODEL:-allenai/MolmoAct2}"
+export STAGE1_CKPT="$MOLMOACT2_STAGE1_CHECKPOINT"
+export STAGE2_ROOT="$MOLMOACT2_STAGE2_ROOT"
+export STAGE1_FEATURE_ROOT="$MOLMOACT2_STAGE1_FEATURE_ROOT"
+export SAVE_FOLDER="$MOLMOACT2_SAVE_FOLDER"
+export MAX_DURATION="${MOLMOACT2_STAGE2_STEPS:-100000}"
+export MAX_ACTION_HORIZON="${MOLMOACT2_ACTION_HORIZON:-50}"
+export MAX_ACTION_DIM="${MOLMOACT2_ACTION_DIM:-16}"
+export MEMORY_NUM_LATENTS="${MOLMOACT2_NUM_LATENTS:-256}"
+export MEMORY_DIM="${MOLMOACT2_MEMORY_DIM:-1024}"
+export GLOBAL_BATCH_SIZE="${MOLMOACT2_GLOBAL_BATCH_SIZE:-4}"
+export DEVICE_BATCH_SIZE="${MOLMOACT2_DEVICE_BATCH_SIZE:-1}"
+
+exec bash \
+  "$ROOT/backbones/molmoact2/experiments/launch_scripts/launch_rmbench_molmoact2_stage2_memory_ablation.bash"

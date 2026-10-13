@@ -1,0 +1,78 @@
+format_version: 1
+models:
+  rmbench_full_attention:
+    hf_repo: Amazon-FAR/imprint_models
+    repo_type: model
+    revision: main
+    path_prefix: simulation/rmbench/full_attention
+    benchmark: rmbench
+    architecture: perceiver_v1
+    stage1_step: 160000
+    stage2_step: 100000
+    files: 29
+    bytes: 11163847443
+    status: public
+  rmbench_recurrent:
+    hf_repo: Amazon-FAR/imprint_models
+    repo_type: model
+    revision: main
+    path_prefix: simulation/rmbench/recurrent
+    benchmark: rmbench
+    architecture: gated_delta_hybrid_v1
+    stage1_step: 160000
+    stage2_step: 100000
+    files: 31
+    bytes: 12406277563
+    status: public
+  rmbench_pi0:
+    hf_repo: Amazon-FAR/imprint_models
+    repo_type: model
+    revision: main
+    path_prefix: simulation/rmbench/pi0
+    benchmark: rmbench
+    architecture: native_pi0_with_perceiver_memory_v1
+    stage1_step: 160000
+    stage2_step: 100000
+    files: 24
+    bytes: 11534442576
+    status: public
+  robocasa_full_attention:
+    hf_repo: Amazon-FAR/imprint_models
+    repo_type: model
+    revision: main
+    path_prefix: simulation/robocasa/full_attention
+    benchmark: robocasa
+    architecture: perceiver_v1
+    stage1_step: 160000
+    stage2_step: 150000
+    files: 32
+    bytes: 12291932558
+    status: public
+  robocasa_recurrent:
+    hf_repo: Amazon-FAR/imprint_models
+    repo_type: model
+    revision: main
+    path_prefix: simulation/robocasa/recurrent
+    benchmark: robocasa
+    architecture: gated_delta_hybrid_v1
+    stage1_step: 160000
+    stage2_step: 150000
+    files: 29
+    bytes: 12406162940
+    status: public
+  rmbench_molmoact2:
+    hf_repo: Amazon-FAR/imprint_models
+    repo_type: model
+    revision: main
+    path_prefix: simulation/rmbench/molmoact2
+    benchmark: rmbench
+    architecture: perceiver_v1
+    backbone: MolmoAct2
+    stage1_step: 160000
+    stage2_step: 100000
+    checkpoint_layout: model_only
+    files: 4
+    bytes: 22747369906
+    model_sha256: ae0dacfcb2a45e82d18266ff5ed49edc26c35c41e038a43065c9a5671773360c
+    config_sha256: 4fd5a9fbb27d500ff8047b96f0739c6ba7cde23a4df0ed687f146b3340340ce0
+    status: public

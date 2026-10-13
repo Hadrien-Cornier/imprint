@@ -1,0 +1,31 @@
+budget: 256
+num_views: 1
+streaming_obs_horizon: 16
+integration_type: modulation
+memory_token_dim: 1024
+representation_type: cosmo_bottleneck
+memory_feature:
+  img:
+    net: identity
+    input_dim: 2048
+  pos:
+    input_dim: 768
+    hidden_dim: 768
+  state:
+    input_dim: 16
+    hidden_dim: 512
+cosmo_bottleneck_memory:
+  variant: CV8x8x8
+  temporal_factor: 8
+  downsample: 2
+  num_latents: 256
+  num_cross_blocks: 2
+  num_heads: 8
+  cosmos_latent_dim: 16
+  siglip_dim: 2048
+  proprio_in_dim: 32
+  action_in_dim: 24
+  action_encoding: raw_delta  # raw_delta -> action_in_dim=24 ; geometric -> action_in_dim=15
+  lang_emb_dim: 2048
+  action_tokenizer_hidden: 512
+  proprio_tokenizer_hidden: 512

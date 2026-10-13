@@ -1,0 +1,28 @@
+# Frame-skip + memory-as-modulator, 3-VIEW washreturn baseline (ROBOMME paper method).
+# Memory uses all 3 training views [agentview_left, agentview_right, eye_in_hand]
+# (num_views: 3), matching the VLA's 3-camera input (base + left_wrist + right_wrist).
+#   use_state_emb: false, memory_use_time: false -> plain visual memory (like 2view-b512)
+# budget 480 / (token_per_image 16 * num_views 3) = exactly 10 frames sampled.
+budget: 480
+num_views: 3
+token_per_image: 16
+streaming_obs_horizon: 16
+pool_type: mean
+use_pos_emb: true
+use_state_emb: false
+memory_use_time: false
+memory_feature:
+  img:
+    net: identity
+    input_dim: 2048
+  pos:
+    input_dim: 768
+    hidden_dim: 768
+  state:
+    input_dim: 16
+    hidden_dim: 512
+integration_type: modulation
+memory_token_dim: 1024
+representation_type: perceptual
+perceptual_memory:
+  type: frame_sampling

@@ -1,0 +1,34 @@
+.DS_Store
+.env
+.env.*
+.idea/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.uv-cache/
+__pycache__/
+*.egg-info/
+*.py[cod]
+
+# Large local artifacts are downloaded from Hugging Face.
+artifacts/checkpoints/*/
+artifacts/datasets/*/
+artifacts/downloads/
+data/
+outputs/
+runs/
+wandb/
+
+# Training and evaluation byproducts.
+*.log
+*.pid
+*.mp4
+*.npz
+*.npy
+*.ocdbt
+checkpoints/
+
+# Keep release manifests and documentation.
+!artifacts/checkpoints/
+!artifacts/checkpoints/manifest.yaml
+!artifacts/datasets/manifest.yaml

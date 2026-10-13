@@ -1,0 +1,89 @@
+budget: 256
+num_views: 3
+streaming_obs_horizon: 16
+integration_type: modulation
+memory_token_dim: 1024
+representation_type: cosmo_bottleneck
+memory_feature:
+  img:
+    net: identity
+    input_dim: 768
+  pos:
+    input_dim: 768
+    hidden_dim: 768
+  state:
+    input_dim: 16
+    hidden_dim: 512
+cosmo_bottleneck_memory:
+  memory_encoder_type: gated_delta_hybrid
+  memory_architecture_version: gated_delta_hybrid_v1
+  memory_compute_dtype: bfloat16
+  visual_feature_stream: dinov3
+  latent_source: offline
+  n_variants: 8
+  num_query_samples: 16
+  variant: Wan2.2-TI2V-5B
+  temporal_factor: 4
+  downsample: 2
+  num_latents: 256
+  num_heads: 8
+  cosmos_latent_dim: 48
+  siglip_dim: 768
+  proprio_in_dim: 16
+  proprio_encoding: raw
+  action_in_dim: 12
+  action_encoding: raw
+  lang_emb_dim: 2048
+  action_tokenizer_hidden: 512
+  proprio_tokenizer_hidden: 512
+  pool_hw: 2
+  wan_h: 256
+  wan_w: 256
+  latent_cap: 4096
+  latent_buckets:
+    - 256
+    - 512
+    - 1024
+    - 2048
+    - 4096
+  max_recent_tokens: 768
+  max_step_tokens: 1776
+  max_stream_steps: 1776
+  delta_num_layers: 2
+  delta_num_heads: 8
+  delta_head_dim: 128
+  delta_conv_kernel: 4
+  delta_ffn_inner: 2048
+  delta_decay_bias: -4.0
+  delta_beta_bias: -1.0
+  delta_scan_checkpoint_size: 20
+  delta_full_scan_mode: chunkwise_wy
+  delta_wy_matmul_dtype: bfloat16
+  delta_recent_fusion_blocks: 1
+  delta_max_chunks: 384
+  delta_event_order: action_proprio_then_finalized_visual_v1
+cosmo_decoder:
+  num_heads: 8
+  num_blocks: 2
+  align_dim: 768
+  align_num_patches: 192
+  ffn_inner: 8192
+  action_dim: 12
+  proprio_dim: 16
+  max_query_steps: 2048
+frame_jitter:
+  enabled: false
+  start_jitter: 3
+  stride_choices:
+    - 1
+    - 2
+    - 3
+  interval_jitter: 1
+  canonical_downsample: 2
+stream_aug:
+  enabled: false
+  gauss_sigma: 0.05
+  stream_drop_p: 0.1
+  feat_drop_p: 0.0
+aux_weight: 0.25
+action_horizon: 20

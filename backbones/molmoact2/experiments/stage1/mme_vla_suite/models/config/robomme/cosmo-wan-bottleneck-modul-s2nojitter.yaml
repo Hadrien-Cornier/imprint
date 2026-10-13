@@ -1,0 +1,63 @@
+budget: 256
+num_views: 3
+streaming_obs_horizon: 16
+integration_type: modulation
+memory_token_dim: 1024
+representation_type: cosmo_bottleneck
+memory_feature:
+  img:
+    net: identity
+    input_dim: 2048
+  pos:
+    input_dim: 768
+    hidden_dim: 768
+  state:
+    input_dim: 16
+    hidden_dim: 512
+cosmo_bottleneck_memory:
+  latent_source: offline
+  pool_hw: 2
+  n_variants: 8
+  num_query_samples: 16   # reconstruct 16 sampled steps/sample (was 32) -> halve align tensor
+  variant: Wan2.2-TI2V-5B
+  temporal_factor: 4
+  downsample: 2
+  num_latents: 256
+  num_cross_blocks: 2
+  num_heads: 8
+  cosmos_latent_dim: 48
+  siglip_dim: 2048
+  proprio_in_dim: 16
+  proprio_encoding: raw  # proprio only, no delta (16d)
+  action_in_dim: 12
+  action_encoding: raw  # action only, no delta (12d)
+  lang_emb_dim: 2048
+  action_tokenizer_hidden: 512
+  proprio_tokenizer_hidden: 512
+
+# Perceiver-IO reconstruction decoder (Stage-1 pretraining; heads discarded at Stage-2 deploy).
+cosmo_decoder:
+  num_heads: 8
+  num_blocks: 2
+  align_dim: 2048
+  align_num_patches: 192
+  ffn_inner: 8192
+  action_dim: 12
+  proprio_dim: 16
+  max_query_steps: 2048
+
+# Frame-index jitter (#1 stride/interval + #3 start). DEFAULT ON (Stage-1 augmentation).
+# Stage-2 configs override enabled->false unless explicitly turned on (see TrainConfig).
+frame_jitter:
+  enabled: false
+  start_jitter: 3
+  stride_choices: [1, 2, 3]
+  interval_jitter: 1
+  canonical_downsample: 2
+
+# Memory-stream input noise (#2). DEFAULT OFF.
+stream_aug:
+  enabled: false
+  gauss_sigma: 0.05
+  stream_drop_p: 0.1
+  feat_drop_p: 0.0

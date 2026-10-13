@@ -1,0 +1,48 @@
+benchmark: rmbench
+architecture: perceiver_v1
+visual_stream: dinov3
+base_policy: MolmoAct2
+source_snapshot: bundled_molmoact2
+release:
+  model_repo: Amazon-FAR/imprint_models
+  model_path_prefix: simulation/rmbench/molmoact2
+  dataset_repo: Amazon-FAR/imprint_datasets
+  dataset_path_prefix: simulation/rmbench/450
+  evaluation_assets_path_prefix: simulation/rmbench/molmoact2_eval_assets
+  revision: main
+dataset:
+  episodes: 450
+  tasks: 9
+  stage1_store: rmbench-450/stage1
+  stage2_store: rmbench-450/stage2
+stage1:
+  trained_steps: 160000
+  selected_step: 160000
+  loss_weights:
+    alignment: 1.0
+    action: 0.5
+    proprio: 0.5
+    progress: 0.0
+stage2:
+  trained_steps: 100000
+  memory_encoder: finetuned
+  memory_seam: native_fixed_film
+  global_batch_size: 4
+  device_batch_size: 1
+  trainable:
+    - language_model
+    - connector
+    - action_expert
+    - memory_encoder
+  frozen:
+    - image_encoder
+evaluation:
+  consolidate_all: true
+  prediction_horizon: 50
+  execution_horizon: 50
+  policy_input_color_order: bgr
+  memory_language_source: stored_pi05
+caps:
+  latent: 4096
+  recent: 768
+  action_proprio: 1244
