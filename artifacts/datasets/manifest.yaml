@@ -1,0 +1,40 @@
+format_version: 1
+datasets:
+  rmbench_450:
+    hf_repo: Amazon-FAR/imprint_datasets
+    repo_type: dataset
+    revision: main
+    path_prefix: simulation/rmbench/450
+    episodes: 450
+    tasks: 9
+    layouts:
+      stage1: stage1/
+      stage2: stage2/
+    files: 350
+    bytes: 411250782303
+    status: public
+  robocasa_600:
+    hf_repo: Amazon-FAR/imprint_datasets
+    repo_type: dataset
+    revision: main
+    path_prefix: simulation/robocasa/600
+    episodes: 600
+    tasks: 12
+    layouts:
+      shared_store: store/
+    files: 465
+    bytes: 590046837315
+    status: public
+  rmbench_molmoact2_eval_assets:
+    hf_repo: Amazon-FAR/imprint_datasets
+    repo_type: dataset
+    revision: main
+    path_prefix: simulation/rmbench/molmoact2_eval_assets
+    tasks: 9
+    episodes: 450
+    layouts:
+      stage2_metadata: stage2/meta/
+      stored_language_embeddings: stage1-language/
+    files: 454
+    bytes: 3899716
+    status: public

@@ -1,0 +1,37 @@
+benchmark: rmbench
+architecture: perceiver_v1
+visual_stream: dinov3
+base_policy: pi0
+release:
+  model_repo: Amazon-FAR/imprint_models
+  model_path_prefix: simulation/rmbench/pi0
+  dataset_repo: Amazon-FAR/imprint_datasets
+  dataset_path_prefix: simulation/rmbench/450
+  revision: main
+dataset:
+  episodes: 450
+  tasks: 9
+  stage1_store: rmbench-450/stage1
+  stage2_store: rmbench-450/stage2
+stage1:
+  trained_steps: 160000
+  selected_step: 160000
+  loss_weights:
+    alignment: 1.0
+    action: 0.5
+    proprio: 0.5
+    progress: 0.5
+stage2:
+  trained_steps: 100000
+  memory_encoder: finetuned
+  frozen:
+    - image_encoder
+evaluation:
+  consolidate_all: true
+  prediction_horizon: 50
+  execution_horizon: 50
+  policy_input_color_order: bgr
+caps:
+  latent: 4096
+  recent: 768
+  action_proprio: 1244
