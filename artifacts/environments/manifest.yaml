@@ -1,0 +1,38 @@
+format_version: 1
+environments:
+  robocasa_1_memory:
+    hf_repo: Amazon-FAR/imprint_datasets
+    repo_type: dataset
+    revision: main
+    path_prefix: simulation/robocasa/environment
+    archive: robocasa-memory-setup.tar.gz
+    sha256: 12cb7a92087298e6e9f299070d294655e54f1340ef578ca5e0581c885a79d9fc
+    files: 5
+    bytes: 2188101
+    python: "3.10"
+    robocasa: "1.0.1"
+    robosuite: "1.5.2"
+    mujoco: "3.3.1"
+    status: public
+    notes:
+      - migrated memory-task registrations
+      - legacy scene-index and replay compatibility
+      - bundled legacy scene metadata
+      - simulator assets downloaded separately
+  rmbench:
+    distribution: upstream benchmark
+    status: not_redistributed
+assets:
+  dinov3_vitb16_runtime:
+    hf_repo: facebook/dinov3-vitb16-pretrain-lvd1689m
+    repo_type: model
+    revision: 5931719e67bbdb9737e363e781fb0c67687896bc
+    model_safetensors_sha256: 9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b
+    status: upstream
+  wan22_ti2v_vae:
+    hf_repo: Wan-AI/Wan2.2-TI2V-5B-Diffusers
+    repo_type: model
+    revision: b8fff7315c768468a5333511427288870b2e9635
+    layout: vae/
+    model_safetensors_sha256: 62cd18f19438e35b32ac63020e2852f566e9b02f46b6cdbd87972a356e3c6f4b
+    status: upstream

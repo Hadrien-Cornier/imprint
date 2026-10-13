@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pre_time_bak
+build/
+.pytest_cache/
+*.bak
+.worktrees/

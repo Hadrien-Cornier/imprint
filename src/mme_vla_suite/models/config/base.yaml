@@ -1,0 +1,128 @@
+budget: 512         # total tokens for the memory representation
+num_views: 1        # number of camera views, only use fixed views
+token_per_image: 64  # defaultnum of tokens per image, only the frame sampling method use 16 tokens.
+streaming_obs_horizon: 16  # input horizon for memory encoder
+
+pool_type: mean
+
+use_pos_emb: true   # If true, will concatenate position embedding to the image embedding
+use_state_emb: false # If true, will concatenate state embedding to the image embedding
+
+# --- time-aware memory add-on (default off -> identical to original architecture) ---
+# When true, a Time2Vec encoding of the per-frame episode-elapsed fraction is concatenated
+# into each memory token (alongside img/pos/state). Targets timing tasks (e.g. MemHeatPot
+# "wait N minutes"). elapsed = step_idx / (episode_len - 1) in [0,1], baked into the feature
+# store per frame. Only affects MEMORY tokens, NOT the live policy state.
+memory_use_time: false
+
+memory_feature:
+  img:
+    net: identity
+    input_dim: 2048 # Image embedding size (extract from siglip encoder in pi05)
+  pos:
+    input_dim: 768  # Position embedding size
+    hidden_dim: 768
+  state:
+    input_dim: 16  # Robot State embedding size for robocasa (eef_pos3+eef_rot4+base_pos3+base_rot4+gripper2)
+    hidden_dim: 512
+  time:
+    out_dim: 32     # Time2Vec output dim (1 linear + 31 periodic); used iff memory_use_time
+    hidden_dim: 128 # projection width inside the memory encoder
+
+
+integration_type: input # [input, modulation, expert]
+memory_token_dim: 2048 # context: 2048; modulation: 1024; expert: 1024
+
+
+# memory representation
+representation_type: perceptual # [perceptual, recurrent, symbolic]
+perceptual_memory:
+  type: frame_sampling # [frame_sampling, token_dropping]
+
+recurrent_memory:
+  type: ttt # [ttt, rmt]
+
+  hidden_dim: 512
+  remat_n_mini_batches: 4 # number of mini-batches to remat
+  output_stats: true
+
+  max_recur_steps: 64
+  max_pretraj_steps: 40
+
+
+  # test-time-training parameters
+  ttt_config:
+    ttt_type: linear
+    num_ttt_heads: 2
+    base_lr: 0.01
+    max_lr: 0.1
+    qk_norm: true
+    v_norm: true
+    max_grad_norm: 5.0
+    remat_n_mini_batches: 4
+
+
+  # recurrent memory transformer parameters
+  rmt_config:
+    num_attn_heads: 8
+    num_kv_heads: 1
+
+
+symbolic_memory:
+  budget: ${budget}
+  type: simple_subgoal # [simple_subgoal, grounded_subgoal]
+
+# video-tokenizer bottleneck memory (Option D): frozen causal Cosmos + recent SigLIP -> 256-token Perceiver
+cosmo_bottleneck_memory:
+  variant: CV8x8x8
+  temporal_factor: 8
+  downsample: 2
+  num_latents: 256          # ablate 128 / 256 / 512
+  num_cross_blocks: 2
+  num_heads: 8
+  align_num_patches: 192       # P (8x8 prefix grid)
+  ffn_inner: 8192             # 4x expansion for wide FFN
+  cosmos_latent_dim: 16
+  siglip_dim: 2048
+  proprio_in_dim: 32        # state 16 + Δp 16
+  action_in_dim: 24         # executed action 12 + Δa 12
+  action_encoding: raw_delta  # raw_delta -> action_in_dim=24 ; geometric -> action_in_dim=15
+  lang_emb_dim: 2048        # PaliGemma gemma_2b text embedding width
+  action_tokenizer_hidden: 512
+  proprio_tokenizer_hidden: 512
+
+# Perceiver-IO reconstruction decoder (Option D, Stage-1 pretraining only; heads discarded at Stage-2).
+# Per-step learned positional queries cross-attend the memory tokens to reconstruct 4 targets:
+# align (per-frame VLA feature), action, proprio, reward/progress. NO language input — memory is
+# already language-conditioned upstream (bottleneck FiLM on), so reward reads task-relativity from memory.
+cosmo_decoder:
+  num_heads: 8
+  align_num_patches: 192       # P (8x8 prefix grid)
+  ffn_inner: 8192             # 4x expansion for wide FFN
+  num_blocks: 2
+  align_dim: 2048           # PaliGemma-prefix pooled VLA feature width
+  action_dim: 12            # executed action target
+  proprio_dim: 16           # robocasa eef-first proprio state
+  max_query_steps: 2048     # learned step-embedding table cap (== MAX_HISTORY_STEPS)
+
+# Memory stream input augmentation (train-only, cosmo_bottleneck Stage-1):
+# (1) Additive Gaussian on encoder inputs (recent/action/proprio), scale-relative.
+# (3) Stream dropout: occasionally zero a whole modality so bottleneck doesn't over-rely.
+# (2) Feature (channel) dropout: optional, off by default.
+# Never touches latent backbone or targets. Set enabled: false for invariant tests.
+stream_aug:
+  enabled: false
+  gauss_sigma: 0.05       # sigma as fraction of each stream's std
+  stream_drop_p: 0.1     # prob of zeroing a WHOLE stream (per sample, per stream)
+  feat_drop_p: 0.0       # fraction of channels zeroed (0 = off; try 0.05 if overfitting)
+
+# Frame-index jitter (#1 stride/interval + #3 start), train-only, cosmo_bottleneck.
+# Selects WHICH ds=1 frames form the buffer each sample (irregular intervals via off-by-1
+# per-gap jitter). Selected frames (strict time order) = the video online-Wan compresses.
+# canonical inference framing uses fixed canonical_downsample, no jitter.
+frame_jitter:
+  enabled: true
+  start_jitter: 3          # drop first U[0,K] frames (K<=3); never reaches the grasp
+  stride_choices: [1, 2, 3]  # base stride sampled per episode
+  interval_jitter: 1       # per-gap +/-1 -> IRREGULAR spacing (user's off-by-1)
+  canonical_downsample: 2  # deterministic inference framing (jitter OFF at eval)

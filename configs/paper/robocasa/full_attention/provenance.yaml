@@ -1,0 +1,45 @@
+benchmark: robocasa
+architecture: perceiver_v1
+visual_stream: dinov3
+base_policy: pi0.5
+release:
+  model_repo: Amazon-FAR/imprint_models
+  model_path_prefix: simulation/robocasa/full_attention
+  dataset_repo: Amazon-FAR/imprint_datasets
+  dataset_path_prefix: simulation/robocasa/600
+  revision: main
+dataset:
+  episodes: 600
+  tasks: 12
+  store: robocasa-600/store
+stage1:
+  trained_steps: 180000
+  selected_step: 160000
+  latent_buckets:
+    - 256
+    - 512
+    - 1024
+    - 2048
+    - 4096
+  length_bucketed_batches: false
+  loss_weights:
+    alignment: 1.0
+    action: 0.5
+    proprio: 0.5
+    progress: 0.5
+stage2:
+  trained_steps: 150000
+  memory_encoder: finetuned
+  frozen:
+    - image_encoder
+evaluation:
+  consolidate_all: true
+  prediction_horizon: 20
+  execution_horizon: 20
+caps:
+  latent: 4096
+  recent: 768
+  action_proprio: 1776
+release_retraining:
+  deterministic_gpu_ops: true
+  seeded_stage2_history_sampling: true
