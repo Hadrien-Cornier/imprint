@@ -28,6 +28,10 @@ TASKS = (
 # not import mme_vla_suite).
 MEMORY_ACTION_ALIGNMENTS = ("causal_raw_previous", "previous_kept_frame")
 
+# Same names as mme_vla_suite.shared.wan_alignment.WAN_CHUNK_ALIGNMENTS (this launcher does not
+# import mme_vla_suite).
+WAN_CHUNK_ALIGNMENTS = ("native", "replicate_first_frame")
+
 PROFILES = {
     "full_attention": {
         "config": "imprint_rmbench_full_attention_memft",
@@ -76,6 +80,16 @@ def parse_args() -> argparse.Namespace:
             "evaluator default): the action executed one raw step earlier. "
             "previous_kept_frame: the action executed at the previous kept frame, as in "
             "the offline variant files (paper Eq. A.1)."
+        ),
+    )
+    parser.add_argument(
+        "--wan-chunk-alignment",
+        choices=WAN_CHUNK_ALIGNMENTS,
+        default="native",
+        help=(
+            "Wan chunk alignment of the memory latents. native: the released checkpoints. "
+            "replicate_first_frame: a checkpoint trained on a re-encoded store. The policy "
+            "refuses a value that differs from the alignment recorded with the checkpoint."
         ),
     )
     return parser.parse_args()
@@ -140,7 +154,10 @@ def verify_simulator_runtime(
 
 
 def policy_server_settings(
-    profile: dict[str, str], checkpoint: Path, memory_action_alignment: str
+    profile: dict[str, str],
+    checkpoint: Path,
+    memory_action_alignment: str,
+    wan_chunk_alignment: str,
 ) -> dict[str, object]:
     """Settings for serve_robomme_tcp.py, kept in the run output as policy_server.yaml."""
     return {
@@ -152,6 +169,7 @@ def policy_server_settings(
         "prediction_horizon": 50,
         "seed": 42,
         "memory_action_alignment": memory_action_alignment,
+        "wan_chunk_alignment": wan_chunk_alignment,
     }
 
 
@@ -197,7 +215,9 @@ def main() -> None:
     server_config = output / "policy_server.yaml"
     server_config.write_text(
         yaml.safe_dump(
-            policy_server_settings(profile, checkpoint, args.memory_action_alignment),
+            policy_server_settings(
+                profile, checkpoint, args.memory_action_alignment, args.wan_chunk_alignment
+            ),
             sort_keys=False,
         )
     )

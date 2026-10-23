@@ -76,12 +76,13 @@ def test_nondeterministic_policy_does_not_set_cublas_workspace() -> None:
     assert "CUBLAS_WORKSPACE_CONFIG" not in environment
 
 
-def test_policy_server_settings_record_memory_action_alignment(tmp_path) -> None:
+def test_policy_server_settings_record_memory_modes(tmp_path) -> None:
     profile = run_local.PROFILES["recurrent"]
 
     settings = run_local.policy_server_settings(
-        profile, tmp_path / "checkpoint", "previous_kept_frame"
+        profile, tmp_path / "checkpoint", "previous_kept_frame", "replicate_first_frame"
     )
 
     assert settings["memory_action_alignment"] == "previous_kept_frame"
+    assert settings["wan_chunk_alignment"] == "replicate_first_frame"
     assert settings["adapter_module"] == profile["adapter"]
